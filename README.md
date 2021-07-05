@@ -1,2 +1,1 @@
-# apnsmock-go
-APNs Mock Server
+# APNs Mock Server
