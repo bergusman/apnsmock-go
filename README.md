@@ -10,7 +10,7 @@ if err != nil {
 
 handler := &mock.Handler{}
 handler.TokenPublicKey = func(keyID, teamID string) *ecdsa.PublicKey {
-	if keyID == "XXXXXXXXXX" && teamID == "XXXXXXXXXX" {
+	if keyID == "XXXXXXXXXX" && teamID == "YYYYYYYYYY" {
 		return &key.PublicKey
 	}
 	return nil
@@ -43,7 +43,7 @@ if err != nil {
 	log.Fatal(err)
 }
 
-token := apns.NewToken(key, "XXXXXXXXXX", "XXXXXXXXXX")
+token := apns.NewToken(key, "XXXXXXXXXX", "YYYYYYYYYY")
 client := apns.NewClient(token, nil)
 
 n := &apns.Notification{
