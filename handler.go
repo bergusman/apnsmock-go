@@ -83,23 +83,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// apns-id
 	if ids, ok := headers["apns-id"]; ok {
-		id = ids[0]
-		if _, err := uuid.Parse(id); err != nil {
+		if _, err := uuid.Parse(ids[0]); err != nil {
 			id = strings.ToUpper(uuid.NewString())
-			w.Header().Set("apns-id", id)
-			notOk(400, "BadMessageId", 0)
-			return
 		} else {
-			w.Header().Set("apns-id", id)
-		}
-		if len(ids) > 1 {
-			notOk(400, "DuplicateHeaders", 0)
-			return
+			id = ids[0]
 		}
 	} else {
 		id = strings.ToUpper(uuid.NewString())
-		w.Header().Set("apns-id", id)
 	}
+	w.Header().Set("apns-id", id)
 
 	// :method
 	if r.Method != http.MethodPost {
@@ -144,6 +136,24 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if token.Expired() {
 		notOk(403, "ExpiredProviderToken", 0)
 		return
+	}
+
+	// Payload
+	if r.ContentLength == 0 {
+		notOk(400, "PayloadEmpty", 0)
+		return
+	}
+
+	// apns-id
+	if ids, ok := headers["apns-id"]; ok {
+		if _, err := uuid.Parse(id); err != nil {
+			notOk(400, "BadMessageId", 0)
+			return
+		}
+		if len(ids) > 1 {
+			notOk(400, "DuplicateHeaders", 0)
+			return
+		}
 	}
 
 	// apns-expiration
@@ -199,12 +209,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	deviceToken := path[len("/3/device/"):]
 	if len(deviceToken) != 64 {
 		notOk(400, "BadDeviceToken", 0)
-		return
-	}
-
-	// Payload
-	if r.ContentLength == 0 {
-		notOk(400, "PayloadEmpty", 0)
 		return
 	}
 
