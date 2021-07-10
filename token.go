@@ -3,6 +3,8 @@ package mock
 import (
 	"crypto"
 	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
@@ -79,6 +81,30 @@ func DecodeToken(bearer string) (*Token, error) {
 		TeamID:   p.Issuer,
 		IssuedAt: p.IssuedAt,
 	}, nil
+}
+
+func GenerateAuthKeyPEM() (string, error) {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return "", nil
+	}
+
+	der, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		return "", nil
+	}
+
+	block := &pem.Block{
+		Type:  "PRIVATE KEY",
+		Bytes: der,
+	}
+
+	bytes := pem.EncodeToMemory(block)
+	if bytes == nil {
+		return "", errors.New("pem encoding failure")
+	}
+
+	return string(bytes), nil
 }
 
 func AuthKeyFromFile(filename string) (*ecdsa.PrivateKey, error) {
