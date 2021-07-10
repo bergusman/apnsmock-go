@@ -83,15 +83,15 @@ func DecodeToken(bearer string) (*Token, error) {
 	}, nil
 }
 
-func GenerateAuthKeyPEM() (string, error) {
+func GenerateAuthKeyPEM() ([]byte, error) {
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 
 	der, err := x509.MarshalPKCS8PrivateKey(key)
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 
 	block := &pem.Block{
@@ -101,10 +101,10 @@ func GenerateAuthKeyPEM() (string, error) {
 
 	bytes := pem.EncodeToMemory(block)
 	if bytes == nil {
-		return "", errors.New("pem encoding failure")
+		return nil, errors.New("pem encoding failure")
 	}
 
-	return string(bytes), nil
+	return bytes, nil
 }
 
 func AuthKeyFromFile(filename string) (*ecdsa.PrivateKey, error) {
